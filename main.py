@@ -39,9 +39,9 @@ with app.app_context():
 #     new_movie = Movie(
 #         title="Phone Booth",
 #         year=2002,
-#         description="Publicist Stuart Shepard finds himself trapped in a phone booth, pinned down by an extortionist's "
-#                 "sniper rifle. Unable to leave or receive outside help, Stuart's negotiation with the caller leads to "
-#                 "a jaw-dropping climax.",
+#         description="Publicist Stuart Shepard finds himself trapped in a phone booth, pinned down by
+#                 "an extortionist's sniper rifle. Unable to leave or receive outside help, Stuart's
+#                 "negotiation with the caller leads to a jaw-dropping climax.",
 #         rating=7.3,
 #         ranking=10,
 #         review="My favourite character was the caller.",
@@ -55,6 +55,25 @@ with app.app_context():
 def home():
     all_movies = db.session.query(Movie).all()
     return render_template("index.html", movies=all_movies)
+
+
+class RateMovieForm(FlaskForm):
+    rating = StringField("Your Rating Out of 10 e.g. 7.5")
+    review = StringField("Your Review")
+    submit = SubmitField("Done")
+
+
+@app.route("/edit", methods=["GET", "POST"])
+def rate_movie():
+    form = RateMovieForm()
+    movie_id = request.args.get("id")
+    movie = Movie.query.get(movie_id)
+    if form.validate_on_submit():
+        movie.rating = float(form.rating.data)
+        movie.review = form.review.data
+        db.session.commit()
+        return redirect(url_for('home'))
+    return render_template("edit.html", movie=movie, form=form)
 
 
 if __name__ == '__main__':
