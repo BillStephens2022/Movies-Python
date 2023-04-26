@@ -7,6 +7,9 @@ from wtforms.validators import DataRequired
 import requests
 import os
 
+MOVIE_DB_SEARCH_URL = 'https://api.themoviedb.org/3/search/movie'
+MOVIE_DB_API_KEY = "cc58ee384616c4f1e489e5acd71ab19b"
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
@@ -93,6 +96,12 @@ class FindMovieForm(FlaskForm):
 @app.route("/add", methods=["GET", "POST"])
 def add_movie():
     form = FindMovieForm()
+    if form.validate_on_submit():
+        movie_title = form.title.data
+        print(movie_title)
+        response = requests.get(MOVIE_DB_SEARCH_URL, params={"api_key": MOVIE_DB_API_KEY, "query": movie_title})
+        data = response.json()["results"]
+        return render_template("select.html", options=data)
     return render_template("add.html", form=form)
 
 
