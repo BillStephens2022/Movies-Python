@@ -9,6 +9,8 @@ import os
 
 MOVIE_DB_SEARCH_URL = 'https://api.themoviedb.org/3/search/movie'
 MOVIE_DB_API_KEY = "cc58ee384616c4f1e489e5acd71ab19b"
+MOVIE_DB_IMAGE_URL = "https://image.tmdb.org/t/p/w500"
+MOVIE_DB_INFO_URL = 'https://api.themoviedb.org/3/movie'
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
@@ -103,6 +105,24 @@ def add_movie():
         data = response.json()["results"]
         return render_template("select.html", options=data)
     return render_template("add.html", form=form)
+
+
+@app.route("/find")
+def find_movie():
+    movie_api_id = request.args.get("id")
+    if movie_api_id:
+        movie_api_url = f"{MOVIE_DB_INFO_URL}/{movie_api_id}"
+        response = requests.get(movie_api_url, params={"api_key": MOVIE_DB_API_KEY, "language": "en-US"})
+        data = response.json()
+        new_movie = Movie(
+            title=data["title"],
+            year=data["release_date"].split("-")[0],
+            img_url=f"{MOVIE_DB_IMAGE_URL}{data['poster_path']}",
+            description=data["overview"]
+        )
+        db.session.add(new_movie)
+        db.session.commit()
+        return redirect(url_for("rate_movie"))
 
 
 if __name__ == '__main__':
