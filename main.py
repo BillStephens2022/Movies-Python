@@ -59,6 +59,10 @@ with app.app_context():
 @app.route("/")
 def home():
     all_movies = db.session.query(Movie).all()
+
+    for i in range(len(all_movies)):
+        all_movies[i].ranking = len(all_movies) - i
+        db.session.commit()
     return render_template("index.html", movies=all_movies)
 
 
@@ -100,7 +104,6 @@ def add_movie():
     form = FindMovieForm()
     if form.validate_on_submit():
         movie_title = form.title.data
-        print(movie_title)
         response = requests.get(MOVIE_DB_SEARCH_URL, params={"api_key": MOVIE_DB_API_KEY, "query": movie_title})
         data = response.json()["results"]
         return render_template("select.html", options=data)
@@ -122,7 +125,7 @@ def find_movie():
         )
         db.session.add(new_movie)
         db.session.commit()
-        return redirect(url_for("rate_movie"))
+        return redirect(url_for("rate_movie", id=new_movie.id))
 
 
 if __name__ == '__main__':
