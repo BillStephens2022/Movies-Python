@@ -8,7 +8,7 @@ import requests
 import os
 
 MOVIE_DB_SEARCH_URL = 'https://api.themoviedb.org/3/search/movie'
-MOVIE_DB_API_KEY = "cc58ee384616c4f1e489e5acd71ab19b"
+MOVIE_DB_API_KEY = os.environ.get('API_KEY')
 MOVIE_DB_IMAGE_URL = "https://image.tmdb.org/t/p/w500"
 MOVIE_DB_INFO_URL = 'https://api.themoviedb.org/3/movie'
 
@@ -42,7 +42,7 @@ with app.app_context():
 
 @app.route("/")
 def home():
-    all_movies = db.session.query(Movie).all()
+    all_movies = Movie.query.order_by(Movie.rating.desc()).all()
 
     for i in range(len(all_movies)):
         all_movies[i].ranking = len(all_movies) - i
