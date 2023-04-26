@@ -72,8 +72,17 @@ def rate_movie():
         movie.rating = float(form.rating.data)
         movie.review = form.review.data
         db.session.commit()
-        return redirect(url_for('home'))
+        return redirect(url_for("home"))
     return render_template("edit.html", movie=movie, form=form)
+
+
+@app.route("/delete")
+def delete_movie():
+    movie_id = request.args.get("id")
+    movie = Movie.query.get(movie_id)
+    db.session.delete(movie)
+    db.session.commit()
+    return redirect(url_for("home"))
 
 
 if __name__ == '__main__':
